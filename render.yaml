@@ -1,0 +1,57 @@
+services:
+  # Backend API Service
+  - type: web
+    name: property-onboarding-api
+    env: python
+    plan: free
+    region: oregon
+    rootDir: property_onboarding_tool
+    buildCommand: pip install -r requirements_super_minimal.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 src.main_memory:create_app()
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: MAX_RETRY_ATTEMPTS
+        value: 3
+      - key: RETRY_DELAY_SECONDS
+        value: 5
+      - key: EXTRACTION_TIMEOUT_SECONDS
+        value: 300
+      - key: PARALLEL_NODE_EXECUTION
+        value: true
+      - key: ENABLE_COMPETITOR_ANALYSIS
+        value: true
+      - key: MAX_COMPETITOR_SEARCHES
+        value: 3
+      - key: MAX_CONCURRENT_NODES
+        value: 4
+      - key: MAX_CONCURRENT_JOBS
+        value: 2
+      - key: REQUEST_TIMEOUT
+        value: 30
+      - key: CRAWL_DELAY_MS
+        value: 500
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Frontend Static Site
+  - type: web
+    name: property-onboarding-ui
+    env: static
+    plan: free
+    region: oregon
+    rootDir: property-onboarding-ui
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://property-onboarding-api.onrender.com
+    autoDeploy: true

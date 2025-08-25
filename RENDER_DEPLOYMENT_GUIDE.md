@@ -33,10 +33,10 @@
 
 #### **Build & Deploy Settings**
 - **Runtime**: `Python 3`
-- **Build Command**: `pip install -r requirements_render.txt` ⚠️ **UPDATED!**
+- **Build Command**: `pip install -r requirements_super_minimal.txt` ⚠️ **UPDATED!**
 - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 src.main_memory:create_app()`
 
-**⚠️ IMPORTANT**: Use `requirements_render.txt` instead of `requirements.txt` to avoid Python 3.13 compatibility issues.
+**⚠️ IMPORTANT**: Use `requirements_super_minimal.txt` to avoid Python 3.13 compatibility issues with lxml and other packages.
 
 #### **Environment Variables**
 Click **"Environment"** tab and add these variables:
@@ -190,10 +190,18 @@ Test these endpoints:
 #### **Cryptography Compatibility Issue** ⚠️ **COMMON ON PYTHON 3.13**
 **Error**: `ERROR: No matching distribution found for cryptography==41.0.8`
 
-**Solution**: Use `requirements_render.txt` instead of `requirements.txt`
-- **Build Command**: `pip install -r requirements_render.txt`
+**Solution**: Use `requirements_super_minimal.txt` instead of `requirements.txt`
+- **Build Command**: `pip install -r requirements_super_minimal.txt`
 - **Alternative**: Use `requirements_minimal.txt` for minimal dependencies
 - **Why**: Python 3.13 requires newer versions of cryptography package
+
+#### **LXML Compatibility Issue** ⚠️ **COMMON ON PYTHON 3.13**
+**Error**: `ERROR: Failed building wheel for lxml`
+
+**Solution**: Use `requirements_super_minimal.txt` which excludes lxml
+- **Build Command**: `pip install -r requirements_super_minimal.txt`
+- **Why**: lxml package is not compatible with Python 3.13 on Render
+- **Alternative**: BeautifulSoup uses built-in `html.parser` instead
 
 #### **Runtime Errors**
 - **Environment variables** - ensure all required vars are set
