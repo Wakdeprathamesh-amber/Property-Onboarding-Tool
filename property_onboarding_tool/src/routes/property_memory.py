@@ -430,31 +430,53 @@ def compare_competitor():
         if not prop_url or not comp_url:
             return jsonify({'error': 'property_url and competitor_url are required'}), 400
 
+        logger.info(f"/competitors/compare called property_url={prop_url} competitor_url={comp_url}")
+
         client = GPTExtractionClient()
         processor = PropertyDataProcessor()
 
         def extract_all(url: str) -> Dict[str, Any]:
-            n1 = client.extract_property_data(url, 'node1_basic_info', job_id=0)
-            n2 = client.extract_property_data(url, 'node2_description', job_id=0)
-            n3 = client.extract_property_data(url, 'node3_configuration', job_id=0)
-            n4 = client.extract_property_data(url, 'node4_tenancy', job_id=0)
-            node_results = {}
-            if n1.success and n1.data:
-                node_results['node1_basic_info'] = n1.data
-            if n2.success and n2.data:
-                node_results['node2_description'] = n2.data
-            if n3.success and n3.data:
-                node_results['node3_configuration'] = n3.data
-            if n4.success and n4.data:
-                node_results['node4_tenancy'] = n4.data
-            merged = processor.merge_node_data(node_results, job_id=0)
-            return {
-                'node_results': node_results,
-                'merged_data': merged.merged_data if merged.success else node_results
+            results: Dict[str, Any] = {
+                'node_results': {},
+                'node_status': {},
+                'errors': []
             }
+            for node_type in ['node1_basic_info', 'node2_description', 'node3_configuration', 'node4_tenancy']:
+                try:
+                    r = client.extract_property_data(url, node_type, job_id=0)
+                    results['node_status'][node_type] = {
+                        'success': bool(getattr(r, 'success', False)),
+                        'error_category': getattr(r, 'error_category', None)
+                    }
+                    if getattr(r, 'success', False) and getattr(r, 'data', None):
+                        results['node_results'][node_type] = r.data
+                    else:
+                        err_msg = getattr(r, 'error', None) or getattr(r, 'message', None) or 'unknown_error'
+                        if err_msg:
+                            results['errors'].append({ 'node': node_type, 'message': str(err_msg) })
+                        logger.warning(f"Extraction failed for {node_type} url={url} error={err_msg}")
+                except Exception as ex:
+                    logger.error(f"Extraction exception for node {node_type} url={url} error={str(ex)}")
+                    results['errors'].append({ 'node': node_type, 'message': str(ex) })
+
+            merged = processor.merge_node_data(results['node_results'], job_id=0)
+            results['merged_data'] = merged.merged_data if getattr(merged, 'success', False) else results['node_results']
+            results['any_success'] = any(v.get('success') for v in results['node_status'].values())
+            return results
 
         ours = extract_all(prop_url)
         theirs = extract_all(comp_url)
+
+        # If both sides failed entirely, return a 502 with diagnostic info
+        if not ours.get('any_success') and not theirs.get('any_success'):
+            logger.error(f"Compare failed for both URLs. property_url={prop_url} competitor_url={comp_url} errors_our={ours.get('errors')} errors_theirs={theirs.get('errors')}")
+            return jsonify({
+                'error': 'Extraction failed for both URLs',
+                'property_url': prop_url,
+                'competitor_url': comp_url,
+                'our_errors': ours.get('errors'),
+                'their_errors': theirs.get('errors')
+            }), 502
 
         return jsonify({
             'success': True,
