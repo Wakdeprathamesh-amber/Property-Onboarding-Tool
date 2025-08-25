@@ -18,6 +18,7 @@ import ProgressMonitor from './components/ProgressMonitor.jsx'
 import JsonViewer from './components/JsonViewer.jsx'
 import CompareResultView from './components/CompareResultView.jsx'
 import './App.css'
+import { apiUrl } from './lib/api.js'
 
 function App() {
   const [currentView, setCurrentView] = useState('submit') // 'submit', 'progress', 'results', 'compare'
@@ -31,7 +32,7 @@ function App() {
     setSubmitError('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/extraction/submit', {
+      const response = await fetch(apiUrl('/api/extraction/submit'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ function App() {
     setIsSubmitting(true)
     setSubmitError('')
     try {
-      const resp = await fetch('http://localhost:5000/api/competitors/compare', {
+      const resp = await fetch(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property_url, competitor_url })

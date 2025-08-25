@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Activity
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api.js'
 
 const ProgressMonitor = ({ jobId, onViewResults }) => {
   const [progress, setProgress] = useState(null)
@@ -23,7 +24,7 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/extraction/jobs/${jobId}/progress`)
+      const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/progress`))
       if (!response.ok) {
         throw new Error('Failed to fetch progress')
       }
@@ -37,7 +38,7 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/extraction/jobs/${jobId}/events?limit=10`)
+      const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/events?limit=10`))
       if (!response.ok) {
         throw new Error('Failed to fetch events')
       }
@@ -50,7 +51,7 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
 
   const handleExportCSV = async () => {
     try {
-      const response = await fetch(`/api/extraction/jobs/${jobId}/export/csv`)
+      const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/export/csv`))
       
       if (!response.ok) {
         const errorData = await response.json()

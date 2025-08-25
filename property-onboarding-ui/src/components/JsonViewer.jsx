@@ -17,6 +17,7 @@ import {
   Star,
   Clock
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api.js'
 
 const JsonViewer = ({ jobId }) => {
   const [results, setResults] = useState(null)
@@ -32,7 +33,7 @@ const JsonViewer = ({ jobId }) => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/extraction/jobs/${jobId}`)
+        const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}`))
         if (!response.ok) {
           throw new Error('Failed to fetch results')
         }
@@ -76,7 +77,7 @@ const JsonViewer = ({ jobId }) => {
     setCompareError('')
     setCompareResult(null)
     try {
-      const resp = await fetch('http://localhost:5000/api/competitors/compare', {
+      const resp = await fetch(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property_url: propUrl || results?.url, competitor_url: compUrl })

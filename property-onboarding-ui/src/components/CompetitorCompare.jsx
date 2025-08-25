@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Alert, AlertDescription } from '@/components/ui/alert.jsx'
+import { apiUrl } from '@/lib/api.js'
 
 export default function CompetitorCompare() {
   const [propertyUrl, setPropertyUrl] = useState('')
@@ -16,7 +17,7 @@ export default function CompetitorCompare() {
     setError('')
     setResult(null)
     try {
-      const resp = await fetch('http://localhost:5000/api/competitors/compare', {
+      const resp = await fetch(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property_url: propertyUrl, competitor_url: competitorUrl })

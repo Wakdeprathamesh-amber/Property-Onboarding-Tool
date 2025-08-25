@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { Alert, AlertDescription } from '@/components/ui/alert.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
+import { apiUrl } from '@/lib/api.js'
 
 export default function CompareResultView({ initialResult }) {
   const [propUrl, setPropUrl] = useState(initialResult?.property_url || '')
@@ -480,7 +481,7 @@ export default function CompareResultView({ initialResult }) {
     setError('')
 
     try {
-      const response = await fetch('/api/competitors/compare', {
+      const response = await fetch(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -512,7 +513,7 @@ export default function CompareResultView({ initialResult }) {
     }
 
     try {
-      const response = await fetch('/api/competitors/compare/export/csv', {
+      const response = await fetch(apiUrl('/api/competitors/compare/export/csv'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
