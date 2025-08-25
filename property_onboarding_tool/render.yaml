@@ -6,7 +6,7 @@ services:
     plan: free
     region: oregon
     rootDir: property_onboarding_tool
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements_render.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 src.main_memory:create_app()
     envVars:
       - key: OPENAI_API_KEY

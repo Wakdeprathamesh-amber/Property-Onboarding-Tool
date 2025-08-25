@@ -33,8 +33,10 @@
 
 #### **Build & Deploy Settings**
 - **Runtime**: `Python 3`
-- **Build Command**: `pip install -r requirements_production.txt`
+- **Build Command**: `pip install -r requirements_render.txt` ⚠️ **UPDATED!**
 - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 src.main_memory:create_app()`
+
+**⚠️ IMPORTANT**: Use `requirements_render.txt` instead of `requirements.txt` to avoid Python 3.13 compatibility issues.
 
 #### **Environment Variables**
 Click **"Environment"** tab and add these variables:
@@ -184,6 +186,14 @@ Test these endpoints:
 - **Check requirements.txt** - ensure all dependencies are listed
 - **Verify Python version** - Render supports Python 3.7+
 - **Check build logs** - look for specific error messages
+
+#### **Cryptography Compatibility Issue** ⚠️ **COMMON ON PYTHON 3.13**
+**Error**: `ERROR: No matching distribution found for cryptography==41.0.8`
+
+**Solution**: Use `requirements_render.txt` instead of `requirements.txt`
+- **Build Command**: `pip install -r requirements_render.txt`
+- **Alternative**: Use `requirements_minimal.txt` for minimal dependencies
+- **Why**: Python 3.13 requires newer versions of cryptography package
 
 #### **Runtime Errors**
 - **Environment variables** - ensure all required vars are set
