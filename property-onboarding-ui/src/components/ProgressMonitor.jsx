@@ -46,8 +46,10 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
       const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/export/csv`))
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to export CSV')
+        const raw = await response.text().catch(() => '')
+        const message = raw || `Failed to export CSV (HTTP ${response.status})`
+        console.error('CSV export failed', { url: apiUrl(`/api/extraction/jobs/${jobId}/export/csv`), status: response.status, raw })
+        throw new Error(message)
       }
 
       // Get the filename from the response headers

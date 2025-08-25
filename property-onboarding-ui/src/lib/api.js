@@ -21,6 +21,7 @@ export async function fetchJson(input, init) {
   }
   if (!response.ok) {
     const message = (data && (data.error || data.message)) || raw || `HTTP ${response.status}`;
+    console.error('API error', { url: typeof input === 'string' ? input : '', status: response.status, contentType, raw });
     throw new Error(typeof message === 'string' ? message : JSON.stringify(message));
   }
   // If empty body, return an empty object to avoid JSON parse errors in callers
