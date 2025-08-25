@@ -11,6 +11,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# allow frontend src/lib to be tracked
+!property-onboarding-ui/src/lib/
+!property-onboarding-ui/src/lib/**
 lib64/
 parts/
 sdist/
