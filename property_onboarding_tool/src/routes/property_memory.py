@@ -19,6 +19,7 @@ import csv
 import io
 from src.extraction.gpt_client import GPTExtractionClient
 from src.extraction.data_processor import PropertyDataProcessor
+import os
 
 property_bp = Blueprint('property', __name__)
 logger = get_logger()
@@ -431,6 +432,9 @@ def compare_competitor():
             return jsonify({'error': 'property_url and competitor_url are required'}), 400
 
         logger.info(f"/competitors/compare called property_url={prop_url} competitor_url={comp_url}")
+        # Quick runtime config check
+        has_api_key = bool(os.environ.get('OPENAI_API_KEY'))
+        logger.info(f"Config check: OPENAI_API_KEY set={has_api_key}")
 
         client = GPTExtractionClient()
         processor = PropertyDataProcessor()
