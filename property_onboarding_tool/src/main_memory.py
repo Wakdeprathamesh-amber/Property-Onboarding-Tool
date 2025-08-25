@@ -52,6 +52,19 @@ def create_app():
     queue_thread = threading.Thread(target=init_queue, daemon=True)
     queue_thread.start()
 
+    # Minimal request logging for diagnostics
+    @app.before_request
+    def _log_request_start():
+        get_logger().info(f"REQ {getattr(getattr(app, 'request_class', None), 'method', 'GET')} {getattr(getattr(app, 'request_class', None), 'path', '')}")
+
+    @app.after_request
+    def _log_request_end(response):
+        try:
+            get_logger().info(f"RES {response.status_code} {response.content_type}")
+        except Exception:
+            pass
+        return response
+
     @app.route('/api/health', methods=['GET'])
     def health_check():
         """Health check endpoint with orchestration system status"""
