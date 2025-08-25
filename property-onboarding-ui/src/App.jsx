@@ -18,7 +18,7 @@ import ProgressMonitor from './components/ProgressMonitor.jsx'
 import JsonViewer from './components/JsonViewer.jsx'
 import CompareResultView from './components/CompareResultView.jsx'
 import './App.css'
-import { apiUrl } from './lib/api.js'
+import { apiUrl, fetchJson } from './lib/api.js'
 
 function App() {
   const [currentView, setCurrentView] = useState('submit') // 'submit', 'progress', 'results', 'compare'
@@ -32,19 +32,11 @@ function App() {
     setSubmitError('')
 
     try {
-      const response = await fetch(apiUrl('/api/extraction/submit'), {
+      const data = await fetchJson(apiUrl('/api/extraction/submit'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit property')
-      }
 
       setCurrentJobId(data.job_id)
       setCurrentView('progress')
@@ -59,13 +51,11 @@ function App() {
     setIsSubmitting(true)
     setSubmitError('')
     try {
-      const resp = await fetch(apiUrl('/api/competitors/compare'), {
+      const data = await fetchJson(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property_url, competitor_url })
       })
-      const data = await resp.json()
-      if (!resp.ok) throw new Error(data.error || 'Comparison failed')
       setComparePayload(data)
       setCurrentView('compare')
     } catch (e) {

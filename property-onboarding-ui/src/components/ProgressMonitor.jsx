@@ -14,7 +14,7 @@ import {
   AlertCircle,
   Activity
 } from 'lucide-react'
-import { apiUrl } from '@/lib/api.js'
+import { apiUrl, fetchJson } from '@/lib/api.js'
 
 const ProgressMonitor = ({ jobId, onViewResults }) => {
   const [progress, setProgress] = useState(null)
@@ -24,11 +24,7 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/progress`))
-      if (!response.ok) {
-        throw new Error('Failed to fetch progress')
-      }
-      const data = await response.json()
+      const data = await fetchJson(apiUrl(`/api/extraction/jobs/${jobId}/progress`))
       setProgress(data)
       setError('')
     } catch (err) {
@@ -38,11 +34,7 @@ const ProgressMonitor = ({ jobId, onViewResults }) => {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}/events?limit=10`))
-      if (!response.ok) {
-        throw new Error('Failed to fetch events')
-      }
-      const data = await response.json()
+      const data = await fetchJson(apiUrl(`/api/extraction/jobs/${jobId}/events?limit=10`))
       setEvents(data.events || [])
     } catch (err) {
       console.error('Failed to fetch events:', err)

@@ -17,7 +17,7 @@ import {
   Star,
   Clock
 } from 'lucide-react'
-import { apiUrl } from '@/lib/api.js'
+import { apiUrl, fetchJson } from '@/lib/api.js'
 
 const JsonViewer = ({ jobId }) => {
   const [results, setResults] = useState(null)
@@ -33,11 +33,7 @@ const JsonViewer = ({ jobId }) => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await fetch(apiUrl(`/api/extraction/jobs/${jobId}`))
-        if (!response.ok) {
-          throw new Error('Failed to fetch results')
-        }
-        const data = await response.json()
+        const data = await fetchJson(apiUrl(`/api/extraction/jobs/${jobId}`))
         setResults(data)
         setError('')
       } catch (err) {
@@ -77,13 +73,11 @@ const JsonViewer = ({ jobId }) => {
     setCompareError('')
     setCompareResult(null)
     try {
-      const resp = await fetch(apiUrl('/api/competitors/compare'), {
+      const data = await fetchJson(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ property_url: propUrl || results?.url, competitor_url: compUrl })
       })
-      const data = await resp.json()
-      if (!resp.ok) throw new Error(data.error || 'Comparison failed')
       setCompareResult(data)
     } catch (e) {
       setCompareError(e.message)

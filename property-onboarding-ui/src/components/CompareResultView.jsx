@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { Alert, AlertDescription } from '@/components/ui/alert.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { apiUrl } from '@/lib/api.js'
+import { apiUrl, fetchJson } from '@/lib/api.js'
 
 export default function CompareResultView({ initialResult }) {
   const [propUrl, setPropUrl] = useState(initialResult?.property_url || '')
@@ -481,7 +481,7 @@ export default function CompareResultView({ initialResult }) {
     setError('')
 
     try {
-      const response = await fetch(apiUrl('/api/competitors/compare'), {
+      const data = await fetchJson(apiUrl('/api/competitors/compare'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -491,13 +491,6 @@ export default function CompareResultView({ initialResult }) {
           competitor_url: compUrl,
         }),
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to compare properties')
-      }
-
-      const data = await response.json()
       setResult(data)
     } catch (err) {
       setError(err.message)
@@ -523,11 +516,6 @@ export default function CompareResultView({ initialResult }) {
           competitor_url: compUrl,
         }),
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to export CSV')
-      }
 
       // Get the filename from the response headers
       const contentDisposition = response.headers.get('Content-Disposition')
