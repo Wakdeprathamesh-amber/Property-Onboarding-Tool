@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 
 # Add the parent directory of src to the Python path
@@ -55,7 +55,10 @@ def create_app():
     # Minimal request logging for diagnostics
     @app.before_request
     def _log_request_start():
-        get_logger().info(f"REQ {getattr(getattr(app, 'request_class', None), 'method', 'GET')} {getattr(getattr(app, 'request_class', None), 'path', '')}")
+        try:
+            get_logger().info(f"REQ {request.method} {request.path}")
+        except Exception:
+            pass
 
     @app.after_request
     def _log_request_end(response):
@@ -67,59 +70,22 @@ def create_app():
 
     @app.route('/api/health', methods=['GET'])
     def health_check():
-        """Health check endpoint with orchestration system status"""
-        # Validate configuration
-        config_validation = get_config().validate_config()
-        
-        # Check job queue status
-        try:
-            from src.orchestration.job_queue_memory import get_job_queue
-            job_queue = get_job_queue()
-            
-            # Use asyncio to get queue stats
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                stats = loop.run_until_complete(job_queue.get_queue_stats())
-                queue_status = {
-                    'status': 'healthy',
-                    'active_workers': stats.active_workers,
-                    'queue_length': stats.queue_length,
-                    'running_jobs': stats.running_jobs
-                }
-            finally:
-                loop.close()
-        except Exception as e:
-            queue_status = {
-                'status': 'unhealthy',
-                'error': str(e)
-            }
-        
-        # Check memory store
-        try:
-            memory_store = get_memory_store()
-            store_stats = memory_store.get_queue_stats()
-            memory_status = {
-                'status': 'healthy',
-                'total_jobs': store_stats.total_jobs,
-                'running_jobs': store_stats.running_jobs,
-                'completed_jobs': store_stats.completed_jobs,
-                'failed_jobs': store_stats.failed_jobs
-            }
-        except Exception as e:
-            memory_status = {
-                'status': 'unhealthy',
-                'error': str(e)
-            }
-        
-        return jsonify({
-            'status': 'healthy' if config_validation['valid'] else 'unhealthy',
-            'storage': 'in-memory',
-            'configuration': config_validation,
-            'job_queue': queue_status,
-            'memory_store': memory_status,
+        """Lightweight health endpoint; always 200 with diagnostics."""
+        cfg = get_config()
+        validation = cfg.validate_config()
+        diagnostics = {
+            'status': 'healthy' if validation.get('valid') else 'unhealthy',
+            'configuration': {
+                'issues': validation.get('issues', []),
+                'api': {
+                    'has_openai_key': validation.get('config_summary', {}).get('api', {}).get('has_openai_key', False),
+                    'openai_model': validation.get('config_summary', {}).get('api', {}).get('openai_model')
+                },
+                'app': validation.get('config_summary', {}).get('app', {})
+            },
             'version': '1.0.0'
-        })
+        }
+        return jsonify(diagnostics), 200
 
     # No catch-all route needed for API-only backend
 
